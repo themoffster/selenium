@@ -1,11 +1,17 @@
 package com.themoffster.selenium.pages;
 
-import com.themoffster.selenium.model.BrowserType;
+import com.google.common.base.Function;
+import com.sun.istack.internal.NotNull;
+import com.themoffster.selenium.model.DriverManager;
 import org.apache.log4j.Logger;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.concurrent.TimeUnit;
 
@@ -13,62 +19,42 @@ import java.util.concurrent.TimeUnit;
 public abstract class AutomatablePage {
 
     private static final Logger LOGGER = Logger.getLogger(AutomatablePage.class);
-    protected WebDriver driver;
+    private static final int DEFAULT_PAGE_LOAD_TIMEOUT = 10;
+    protected DriverManager driverManager;
 
-    /**
-     * Ensures that a WebDriver is created for the relevant browser type.<br>
-     * If no browser type is specified, or the value is invalid, then a default Safari browser is used.
-     * @param browserType the BrowserType to use
-     * @return a WebDriver setup for the argument browser type
-     */
-    protected WebDriver createDriver(BrowserType browserType) {
-        WebDriver createdDriver;
-        switch(browserType.getBrowserType()) {
-            case "safari" :
-                createdDriver = new SafariDriver();
-                LOGGER.info("Using Safari browser");
-                break;
-            case "chrome" :
-                createdDriver = new ChromeDriver();
-                LOGGER.info("Using Chrome browser");
-                break;
-            case "firefox" :
-                createdDriver = new FirefoxDriver();
-                LOGGER.info("Using Firefox browser");
-                break;
-            default :
-                LOGGER.info("Using default (Safari) browser");
-                createdDriver = new SafariDriver();
-        }
-        createdDriver.manage().window().maximize();
-        createdDriver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        return createdDriver;
+    public AutomatablePage(DriverManager driverManager) {
+        this.driverManager = driverManager;
+    }
+
+    public boolean isPageLoaded() {
+        return driverManager.isPageLoaded(getPageLoadTimeout(), getPageLoadedElement());
+    }
+
+    public abstract WebElement getPageLoadedElement();
+
+    protected int getPageLoadTimeout() {
+        return DEFAULT_PAGE_LOAD_TIMEOUT;
     }
 
     /**
      * Makes the webdriver open the page.
+     * @param url the URL to open in the browser
      */
-    public void openPage() {
-        driver.get(getUrl());
+    public void openPage(String url) {
+        driverManager.openURL(url);
     }
-
-    /**
-     * The URL of the page.
-     * @return the URL of the page
-     */
-    public abstract String getUrl();
 
     /**
      * Closes the webdriver.
      */
     public void closeDriver() {
-        driver.close();
+        driverManager.closeDriver();
     }
 
     /**
      * Quits the webdriver.
      */
     public void quitDriver() {
-        driver.quit();
+        driverManager.quitDriver();
     }
 }

@@ -1,15 +1,10 @@
 package com.themoffster.selenium.pages;
 
-import com.themoffster.selenium.model.BrowserType;
-import org.openqa.selenium.Keys;
+import com.themoffster.selenium.model.DriverManager;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-@Component
 public class YellHomepage extends AutomatablePage {
 
     @FindBy(id="search_keyword")
@@ -19,15 +14,14 @@ public class YellHomepage extends AutomatablePage {
     @FindBy(xpath="//button[contains(text(),'Search')]")
     private WebElement searchButton;
 
-    @Autowired
-    public YellHomepage(@Value("${browserType}") BrowserType browserType) { //TODO ensure this can be overridden by -D switch
-        this.driver = createDriver(browserType);
-        PageFactory.initElements(driver, this);
+    public YellHomepage(DriverManager driverManager) {
+        super(driverManager);
+        PageFactory.initElements(driverManager.getWebDriver(), this);
     }
 
     @Override
-    public String getUrl() {
-        return "https://www.yell.com/";
+    public WebElement getPageLoadedElement() {
+        return businessTextfield;
     }
 
     public void typeBusiness(String text) {
@@ -38,7 +32,8 @@ public class YellHomepage extends AutomatablePage {
         areaTextfield.sendKeys(text);
     }
 
-    public void clickGo() {
+    public YellSearchResults clickGo() {
         searchButton.click();
+        return new YellSearchResults(driverManager);
     }
 }
