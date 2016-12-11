@@ -97,7 +97,7 @@ public class DriverManager {
         } catch (TimeoutException ex) {
             LOGGER.error("Page wasn't loaded after timeout of " + timeout + " secs", ex);
             isLoaded = false;
-        } catch (UnsupportedCommandException ex) { //FIXME Safari driver waits aren't working
+        } catch (UnsupportedCommandException ex) { //FIXME Safari driver waits don't work
             LOGGER.error("Unsupported command", ex);
             isLoaded = false;
         }

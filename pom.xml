@@ -11,12 +11,13 @@
     <properties>
         <cucumber.version>1.2.5</cucumber.version>
         <log4j.version>1.2.17</log4j.version>
-        <org.springframework.version>4.1.4.RELEASE</org.springframework.version>
+        <spring.version>4.1.4.RELEASE</spring.version>
         <!-- firefox working version -->
         <selenium.version>2.53.1</selenium.version>
         <!-- safari working version -->
         <!--<selenium.version>3.0.1</selenium.version>-->
         <jdk.version>1.7</jdk.version>
+        <aspectj.version>1.7.3</aspectj.version>
     </properties>
 
     <dependencies>
@@ -45,12 +46,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -58,6 +59,16 @@
             <artifactId>cucumber-spring</artifactId>
             <version>${cucumber.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+            <version>${spring.version}</version>
         </dependency>
     </dependencies>
 
