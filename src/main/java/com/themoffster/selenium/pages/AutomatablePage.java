@@ -1,19 +1,8 @@
 package com.themoffster.selenium.pages;
 
-import com.google.common.base.Function;
-import com.sun.istack.internal.NotNull;
 import com.themoffster.selenium.model.DriverManager;
 import org.apache.log4j.Logger;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.util.concurrent.TimeUnit;
 
 
 public abstract class AutomatablePage {
@@ -30,6 +19,11 @@ public abstract class AutomatablePage {
         return driverManager.isPageLoaded(getPageLoadTimeout(), getPageLoadedElement());
     }
 
+    /**
+     * Each page should specify a WebElement which can be checked for presence which will validate whether a page is loaded or not.
+     *
+     * @return a WebElement which should exist on a page
+     */
     public abstract WebElement getPageLoadedElement();
 
     protected int getPageLoadTimeout() {
@@ -37,7 +31,8 @@ public abstract class AutomatablePage {
     }
 
     /**
-     * Makes the webdriver open the page.
+     * Makes the WebDriver open the page.
+     *
      * @param url the URL to open in the browser
      */
     public void openPage(String url) {
@@ -45,14 +40,14 @@ public abstract class AutomatablePage {
     }
 
     /**
-     * Closes the webdriver.
+     * Closes the WebDriver.
      */
     public void closeDriver() {
         driverManager.closeDriver();
     }
 
     /**
-     * Quits the webdriver.
+     * Quits the WebDriver.
      */
     public void quitDriver() {
         driverManager.quitDriver();
