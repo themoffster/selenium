@@ -1,21 +1,12 @@
 package com.themoffster.selenium.model;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.safari.SafariDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Wait;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 
 @Component
 public class DriverManager {
@@ -27,13 +18,14 @@ public class DriverManager {
     @Value("${firefox.path}")
     private String firefoxPath;
 
-    @PostConstruct
-    public void init() {
-        this.driver = initWebDriver();
-    }
-
-    private WebDriver initWebDriver() {
-        if (driver == null) {
+    /**
+     * Instantiates a new WebDriver of the appropriate browser type, registers a shutdown hook so that the browser can
+     * be cleanly quit and maximises the browser to full screen.
+     *
+     * @return the newly created WebDriver
+     */
+    public WebDriver createWebDriver() {
+        try {
             switch (browserType.getBrowserType()) {
                 case "safari":
                     driver = new SafariDriver();
@@ -49,59 +41,14 @@ public class DriverManager {
                     LOGGER.info("Using Firefox browser");
                     break;
                 default:
-                    LOGGER.info("Using default (Safari) browser");
-                    driver = new SafariDriver();
+                    LOGGER.info("Using default (Firefox) browser");
+                    driver = new FirefoxDriver();
             }
-            driver.manage().window().maximize();
+        } finally {
+            Runtime.getRuntime().addShutdownHook(new Thread(new BrowserCleanup(driver)));
         }
+        driver.manage().window().maximize();
         return driver;
-    }
-
-    /**
-     * Gets the current WebDriver assosciated with this DriverManager.
-     *
-     * @return the current WebDriver
-     */
-    public WebDriver getWebDriver() {
-        return driver;
-    }
-
-    /**
-     * Makes the WebDriver open the specified URL in the browser.
-     *
-     * @param url the URL to open in the browser
-     */
-    public void openURL(String url) {
-        driver.get(url);
-    }
-
-    /**
-     * To verify a page has loaded correctly, a specific WebElement on the page should be looked for.
-     * Each page specifies which element it should check for through the AutomatablePage.getPageLoadedElement() and each
-     * page's specific timeout comes from the getPageLoadTimeout method.<br>
-     * If the WebElement is not found before the timeout expires, the page hasn't loaded in time and a TimeoutException
-     * is thrown and caught. The SarafiDriver currently does not cater for waits very well and thrown an
-     * UnsupportedCommandException. This exception is also caught and tidily makes the method return a boolean rather
-     * than allowing the error to propagate up the stack.
-     *
-     * @param timeout the number of seconds the page should wait for before throwing a TimeoutException
-     * @param element the WebElement to poll the page for
-     * @return true if the WebElement was found within the timeout, false otherwise
-     */
-    public boolean isPageLoaded(int timeout, WebElement element) {
-        boolean isLoaded = true;
-        Wait wait = new WebDriverWait(driver, timeout);
-        ExpectedCondition<WebElement> condition = ExpectedConditions.visibilityOf(element);
-        try {
-            wait.until(condition);
-        } catch (TimeoutException ex) {
-            LOGGER.error("Page wasn't loaded after timeout of " + timeout + " secs", ex);
-            isLoaded = false;
-        } catch (UnsupportedCommandException ex) { //FIXME Safari driver waits don't work
-            LOGGER.error("Unsupported command", ex);
-            isLoaded = false;
-        }
-        return isLoaded;
     }
 
     /**
@@ -111,10 +58,29 @@ public class DriverManager {
         driver.close();
     }
 
+
     /**
-     * Quits the WebDriver.
+     * A private inner class who's sole job is to quit the WebDriver at the correct time.
      */
-    public void quitDriver() {
-        driver.quit();
+    private static class BrowserCleanup implements Runnable {
+
+        private static WebDriver driver;
+
+        private BrowserCleanup(WebDriver driver) {
+            BrowserCleanup.driver = driver;
+        }
+
+        @Override
+        public void run() {
+            LOGGER.info("Quitting the browser");
+            quitDriver();
+        }
+
+        /**
+         * Quits the WebDriver.
+         */
+        public void quitDriver() {
+            driver.quit();
+        }
     }
 }

@@ -1,11 +1,15 @@
 package com.themoffster.selenium.pages;
 
 import com.themoffster.selenium.model.DriverManager;
+import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -21,9 +25,9 @@ public class YellHomepageStepDefs {
 
     @Given("^I am on the \"([^\"]*)\" webpage$")
     public void onSearchPage(String url) throws Throwable {
-        homepage = new YellHomepage(driverManager);
+        homepage = new YellHomepage(driverManager.createWebDriver());
         homepage.openPage(url);
-        //assertTrue(homepage.isPageLoaded()); //FIXME Safari driver waits aren't working
+        homepageIsLoaded();
     }
 
     @When("^I type \"([^\"]*)\" as a business to search for$")
@@ -41,14 +45,23 @@ public class YellHomepageStepDefs {
         resultsPage = homepage.clickGo();
     }
 
+    @Then("^The page should be correctly loaded$")
+    public void homepageIsLoaded() throws Throwable {
+        assertTrue(homepage.isPageLoaded());
+    }
+
     @Then("^I should be taken to a results page$")
-    public void takenToResults() throws Throwable {
-        assertTrue(resultsPage.isPageLoaded()); //FIXME this fails currently because the Safari driver can't deal with waits
+    public void resultsPageIsLoaded() throws Throwable {
+        assertTrue(resultsPage.isPageLoaded());
     }
 
     @After
-    public void tearDown() {
-        homepage.closeDriver();
-        homepage.quitDriver();
+    public void tearDown(Scenario result) {
+        WebDriver driver = homepage.getDriver();
+        if(result.isFailed()) {
+            byte[] screenshot =  ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+            result.embed(screenshot, "image/png");
+        }
+        driver.close();
     }
 }

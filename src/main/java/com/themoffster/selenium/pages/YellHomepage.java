@@ -1,12 +1,14 @@
 package com.themoffster.selenium.pages;
 
 import com.themoffster.selenium.model.DriverManager;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 public class YellHomepage extends AutomatablePage {
 
+    private static final int PAGE_LOAD_TIMEOUT = 5;
     @FindBy(id = "search_keyword")
     private WebElement businessTextfield;
     @FindBy(id = "search_location")
@@ -14,14 +16,19 @@ public class YellHomepage extends AutomatablePage {
     @FindBy(xpath = "//button[contains(text(),'Search')]")
     private WebElement searchButton;
 
-    public YellHomepage(DriverManager driverManager) {
-        super(driverManager);
-        PageFactory.initElements(driverManager.getWebDriver(), this);
+    public YellHomepage(WebDriver driver) {
+        super(driver);
+        PageFactory.initElements(driver, this);
     }
 
     @Override
     public WebElement getPageLoadedElement() {
         return businessTextfield;
+    }
+
+    @Override
+    protected int getPageLoadTimeout() {
+        return PAGE_LOAD_TIMEOUT;
     }
 
     /**
@@ -51,6 +58,6 @@ public class YellHomepage extends AutomatablePage {
      */
     public YellSearchResults clickGo() {
         searchButton.click();
-        return new YellSearchResults(driverManager);
+        return new YellSearchResults(driver);
     }
 }
